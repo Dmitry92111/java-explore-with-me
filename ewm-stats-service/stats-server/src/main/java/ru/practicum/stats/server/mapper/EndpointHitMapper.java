@@ -9,10 +9,10 @@ public class EndpointHitMapper {
 
     public static EndpointHit fromDto(EndpointHitCreateDto dto) {
         return EndpointHit.of(
-                dto.app(),
-                dto.uri(),
-                dto.ip(),
-                dto.timestamp()
+                dto.getApp(),
+                dto.getUri(),
+                dto.getIp(),
+                dto.getTimestamp()
         );
     }
 }
