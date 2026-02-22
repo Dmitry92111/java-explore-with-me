@@ -1,14 +1,64 @@
 services:
-  stats-server:
-    ports:
-      - "9090:9090"
-
   stats-db:
     image: postgres:16.1
-
-  ewm-service:
     ports:
-      - "8080:8080"
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: ewm-stats-db
+      POSTGRES_USER: db-user
+      POSTGRES_PASSWORD: 12345
+    volumes:
+      - ewm-stats-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U db-user -d ewm-stats-db" ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  stats-server:
+    build: ./ewm-stats-service/stats-server
+    ports:
+      - "9090:9090"
+    depends_on:
+      stats-db:
+        condition: service_healthy
+    environment:
+      SERVER_PORT: 9090
+      SPRING_DATASOURCE_URL: jdbc:postgresql://stats-db:5432/ewm-stats-db
+      SPRING_DATASOURCE_USERNAME: db-user
+      SPRING_DATASOURCE_PASSWORD: 12345
 
   ewm-db:
     image: postgres:16.1
+    ports:
+      - "5434:5432"
+    environment:
+      POSTGRES_DB: ewm-main-db
+      POSTGRES_USER: db-user
+      POSTGRES_PASSWORD: 12345
+
+    volumes:
+      - ewm-main-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U db-user -d ewm-main-db" ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  ewm-service:
+    build: ./ewm-main-service
+    ports:
+      - "8080:8080"
+    depends_on:
+      ewm-db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://ewm-db:5432/ewm-main-db
+      SPRING_DATASOURCE_USERNAME: db-user
+      SPRING_DATASOURCE_PASSWORD: 12345
+
+      STATS_SERVER_URL: http://stats-server:9090
+
+volumes:
+  ewm-stats-data:
+  ewm-main-data:
