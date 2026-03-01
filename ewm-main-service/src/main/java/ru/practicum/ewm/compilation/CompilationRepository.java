@@ -12,12 +12,10 @@ import java.util.Optional;
 public interface CompilationRepository extends JpaRepository<Compilation, Long> {
 
 
-    @Query("""
-            SELECT DISTINCT c
-            FROM Compilation c
-            LEFT JOIN FETCH c.events
-            WHERE c.id = :id
-            """)
+    @Query("SELECT DISTINCT c " +
+            "FROM Compilation c " +
+            "LEFT JOIN FETCH c.events " +
+            "WHERE c.id = :id")
     Optional<Compilation> findByIdWithEvents(@Param("id") long id);
 
     @Modifying
