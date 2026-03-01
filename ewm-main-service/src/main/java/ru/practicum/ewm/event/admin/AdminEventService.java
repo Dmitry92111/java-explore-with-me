@@ -179,8 +179,7 @@ public class AdminEventService {
 
     private void validateEventDateForUpdateEvent(LocalDateTime eventDate) {
         if (eventDate.isBefore(LocalDateTime.now().plusHours(1))) {
-            throw new ConditionsNotMetException(String.format
-                    (ExceptionMessages.DEFAULT_FIELD_S_ERROR_S_VALUE_S_MESSAGE,
+            throw new ConditionsNotMetException(String.format(ExceptionMessages.DEFAULT_FIELD_S_ERROR_S_VALUE_S_MESSAGE,
                             "eventDate", "Too early to change this event", eventDate));
         }
     }
