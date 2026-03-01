@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.practicum.ewm.event.entity.Event;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 

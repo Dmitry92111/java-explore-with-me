@@ -261,9 +261,9 @@ public class PrivateEventService {
 
     private void validateEventDateForCreateAndUpdateEvent(LocalDateTime eventDate) {
         if (eventDate.isBefore(LocalDateTime.now().plusHours(2))) {
-            throw new ConditionsNotMetException(String.format
-                    (ExceptionMessages.DEFAULT_FIELD_S_ERROR_S_VALUE_S_MESSAGE,
-                            "eventDate", "должно содержать дату, которая еще не наступила.", eventDate));
+            throw new ConditionsNotMetException(String.format(
+                    ExceptionMessages.DEFAULT_FIELD_S_ERROR_S_VALUE_S_MESSAGE,
+                    "eventDate", "должно содержать дату, которая еще не наступила.", eventDate));
         }
     }
 }
