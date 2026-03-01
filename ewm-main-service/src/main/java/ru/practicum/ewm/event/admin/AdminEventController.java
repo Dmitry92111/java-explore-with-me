@@ -19,11 +19,11 @@ public class AdminEventController {
     private final AdminEventService adminEventService;
 
     @GetMapping
-    public List<EventFullDto> findEvents(@RequestParam List<Long> users,
-                                         @RequestParam List<String> states,
-                                         @RequestParam List<Long> categories,
-                                         @RequestParam String rangeStart,
-                                         @RequestParam String rangeEnd,
+    public List<EventFullDto> findEvents(@RequestParam(required = false) List<Long> users,
+                                         @RequestParam(required = false) List<String> states,
+                                         @RequestParam(required = false) List<Long> categories,
+                                         @RequestParam(required = false) String rangeStart,
+                                         @RequestParam(required = false) String rangeEnd,
                                          @Min(0) @RequestParam(defaultValue = "0") int from,
                                          @Positive @RequestParam(defaultValue = "10") int size) {
         return adminEventService.findEvents(users, states, categories, rangeStart, rangeEnd, from, size);

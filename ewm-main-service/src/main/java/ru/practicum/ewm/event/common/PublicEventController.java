@@ -19,13 +19,13 @@ public class PublicEventController {
     private final PublicEventService publicEventService;
 
     @GetMapping
-    public List<EventShortDto> findEvents(@RequestParam String text,
-                                          @RequestParam List<Long> categories,
-                                          @RequestParam Boolean paid,
-                                          @RequestParam String rangeStart,
-                                          @RequestParam String rangeEnd,
+    public List<EventShortDto> findEvents(@RequestParam(required = false) String text,
+                                          @RequestParam(required = false) List<Long> categories,
+                                          @RequestParam(required = false) Boolean paid,
+                                          @RequestParam(required = false) String rangeStart,
+                                          @RequestParam(required = false) String rangeEnd,
                                           @RequestParam(defaultValue = "false") boolean onlyAvailable,
-                                          @RequestParam String sort,
+                                          @RequestParam(required = false) String sort,
                                           @Min(0) @RequestParam(defaultValue = "0") int from,
                                           @Positive @RequestParam(defaultValue = "10") int size,
                                           HttpServletRequest request) {
