@@ -37,11 +37,10 @@ public class GlobalExceptionHandler {
                                                HttpServletRequest req) {
         BindingResult bindingResult;
 
-        if (ex instanceof MethodArgumentNotValidException manve) {
-            bindingResult = manve.getBindingResult();
+        if (ex instanceof MethodArgumentNotValidException) {
+            bindingResult = ((MethodArgumentNotValidException) ex).getBindingResult();
         } else {
-            BindException be = (BindException) ex;
-            bindingResult = be.getBindingResult();
+            bindingResult = ((BindException) ex).getBindingResult();
         }
 
         log4xx(HttpStatus.BAD_REQUEST, req, "validation errors=%d", bindingResult.getFieldErrorCount());
@@ -95,19 +94,25 @@ public class GlobalExceptionHandler {
     public ApiError handleBadRequestExceptions(Exception ex,
                                                HttpServletRequest req) {
 
-        String message = switch (ex) {
-            case HttpMessageNotReadableException ignored -> ExceptionMessages.INCORRECT_HTTP_REQUEST_BODY;
-            case MethodArgumentTypeMismatchException mismatch -> String.format(
+        String message;
+        if (ex instanceof HttpMessageNotReadableException) {
+            message = ExceptionMessages.INCORRECT_HTTP_REQUEST_BODY;
+        } else if (ex instanceof MethodArgumentTypeMismatchException) {
+            MethodArgumentTypeMismatchException mismatch = (MethodArgumentTypeMismatchException) ex;
+            message = String.format(
                     ExceptionMessages.MISMATCH_OF_TYPES_OF_PARAMETER_OF_REQUEST_AND_METHOD_ARGUMENT,
                     mismatch.getName(),
                     mismatch.getValue()
             );
-            case MissingServletRequestParameterException missing -> String.format(
+        } else if (ex instanceof MissingServletRequestParameterException) {
+            MissingServletRequestParameterException missing = (MissingServletRequestParameterException) ex;
+            message = String.format(
                     ExceptionMessages.MISSING_REQUIRED_PARAMETER_OF_HTTP_REQUEST,
                     missing.getParameterName()
             );
-            default -> ExceptionMessages.INCORRECT_REQUEST;
-        };
+        } else {
+            message = ExceptionMessages.INCORRECT_REQUEST;
+        }
 
         log4xx(HttpStatus.BAD_REQUEST, req, message);
 
@@ -207,8 +212,8 @@ public class GlobalExceptionHandler {
     private org.hibernate.exception.ConstraintViolationException findHibernateConstraintViolation(Throwable ex) {
         Throwable current = ex;
         while (current != null) {
-            if (current instanceof org.hibernate.exception.ConstraintViolationException cve) {
-                return cve;
+            if (current instanceof org.hibernate.exception.ConstraintViolationException) {
+                return (org.hibernate.exception.ConstraintViolationException) current;
             }
             current = current.getCause();
         }
