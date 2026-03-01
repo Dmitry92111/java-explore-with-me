@@ -1,8 +1,6 @@
 package ru.practicum.stats.client;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
@@ -15,13 +13,13 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-@Service
+
 public class StatsClientImpl implements StatsClient {
 
     private final RestTemplate restTemplate;
     private final String baseUrl;
 
-    public StatsClientImpl(@Value("${stats.server.url}") String baseUrl,
+    public StatsClientImpl(String baseUrl,
                            RestTemplate statsRestTemplate) {
         this.baseUrl = baseUrl;
         this.restTemplate = statsRestTemplate;
