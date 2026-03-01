@@ -140,18 +140,28 @@ public class PrivateEventService {
 
         if (dto.getStateAction() != null) {
             switch (dto.getStateAction()) {
-                case SEND_TO_REVIEW -> {
-                    if (event.getState() == EventStatus.PENDING) throw new ConditionsNotMetException(
-                            ExceptionMessages.SHOULD_BE_IMPOSSIBLE_TO_SEND_PENDING_REQUEST_TO_REVIEW
-                    );
+                case SEND_TO_REVIEW:
+                    if (event.getState() == EventStatus.PENDING) {
+                        throw new ConditionsNotMetException(
+                                ExceptionMessages.SHOULD_BE_IMPOSSIBLE_TO_SEND_PENDING_REQUEST_TO_REVIEW
+                        );
+                    }
                     event.setState(EventStatus.PENDING);
-                }
-                case CANCEL_REVIEW -> {
-                    if (event.getState() == EventStatus.CANCELED) throw new ConditionsNotMetException(
-                            ExceptionMessages.SHOULD_BE_IMPOSSIBLE_TO_CANCEL_CANCELLED_REQUEST
-                    );
+                    break;
+
+                case CANCEL_REVIEW:
+                    if (event.getState() == EventStatus.CANCELED) {
+                        throw new ConditionsNotMetException(
+                                ExceptionMessages.SHOULD_BE_IMPOSSIBLE_TO_CANCEL_CANCELLED_REQUEST
+                        );
+                    }
                     event.setState(EventStatus.CANCELED);
-                }
+                    break;
+
+                default:
+                    throw new ConditionsNotMetException(
+                            "Unsupported stateAction: " + dto.getStateAction()
+                    );
             }
         }
         return eventMapper.toEventFullDtoForCreateAndUpdate(event);

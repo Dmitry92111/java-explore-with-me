@@ -149,18 +149,23 @@ public class AdminEventService {
 
         if (dto.getStateAction() != null) {
             switch (dto.getStateAction()) {
-                case PUBLISH_EVENT -> {
-                    if (event.getState() != EventStatus.PENDING) throw new ConditionsNotMetException(
-                            ExceptionMessages.ONLY_PENDING_EVENT_CAN_BE_PUBLISHED
-                    );
+                case PUBLISH_EVENT:
+                    if (event.getState() != EventStatus.PENDING) {
+                        throw new ConditionsNotMetException(ExceptionMessages.ONLY_PENDING_EVENT_CAN_BE_PUBLISHED);
+                    }
                     event.setState(EventStatus.PUBLISHED);
-                }
-                case REJECT_EVENT -> {
-                    if (event.getState() == EventStatus.PUBLISHED) throw new ConditionsNotMetException(
-                            ExceptionMessages.SHOULD_BE_IMPOSSIBLE_TO_REJECT_PUBLISHED_EVENT
-                    );
+                    break;
+
+                case REJECT_EVENT:
+                    if (event.getState() == EventStatus.PUBLISHED) {
+                        throw new ConditionsNotMetException(
+                                ExceptionMessages.SHOULD_BE_IMPOSSIBLE_TO_REJECT_PUBLISHED_EVENT
+                        );
+                    }
                     event.setState(EventStatus.CANCELED);
-                }
+                    break;
+                default:
+                    throw new ConditionsNotMetException("Unsupported stateAction: " + dto.getStateAction());
             }
         }
         return eventMapper.toEventFullDtoForCreateAndUpdate(event);
