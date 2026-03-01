@@ -15,13 +15,11 @@ import java.util.Optional;
 @Repository
 public interface ParticipationRequestRepository extends JpaRepository<ParticipationRequest, Long> {
 
-    @Query("""
-            SELECT r.event.id as eventId, COUNT(r.id) as count
-            FROM ParticipationRequest r
-            WHERE r.status = :status
-            AND r.event.id IN (:eventIds)
-            GROUP BY r.event.id
-            """)
+    @Query("SELECT r.event.id as eventId, COUNT(r.id) as count " +
+            "FROM ParticipationRequest r " +
+            "WHERE r.status = :status " +
+            "AND r.event.id IN :eventIds " +
+            "GROUP BY r.event.id")
     List<EventCountView> countByEventIdsAndStatus(@Param("eventIds") List<Long> eventIds,
                                                   @Param("status") ParticipationRequestStatus status);
 
@@ -40,11 +38,9 @@ public interface ParticipationRequestRepository extends JpaRepository<Participat
     Optional<ParticipationRequest> findByIdAndRequester_Id(long id, long requesterId);
 
     @Modifying
-    @Query("""
-            UPDATE ParticipationRequest r
-            SET r.status = :newStatus
-            WHERE r.requester.id = :userId and r.status = :oldStatus
-            """)
+    @Query("UPDATE ParticipationRequest r " +
+            "SET r.status = :newStatus " +
+            "WHERE r.requester.id = :userId AND r.status = :oldStatus")
     int updateParticipationRequestsStatusByRequesterId(@Param("userId") long userId,
                                                        @Param("oldStatus") ParticipationRequestStatus oldStatus,
                                                        @Param("newStatus") ParticipationRequestStatus newStatus);

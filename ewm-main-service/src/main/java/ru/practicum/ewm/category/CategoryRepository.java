@@ -10,12 +10,12 @@ import java.util.List;
 @Repository
 public interface CategoryRepository extends JpaRepository<Category, Long> {
 
-    @Query(value = """
-            SELECT id, name
-            FROM categories
-            ORDER BY id
-            LIMIT :size OFFSET :from
-            """, nativeQuery = true)
+    @Query(value =
+            "SELECT id, name " +
+            "FROM categories " +
+            "ORDER BY id " +
+            "LIMIT :size OFFSET :from",
+            nativeQuery = true)
     List<Category> findAllOrderedById(@Param("from") int from,
                                       @Param("size") int size);
 }

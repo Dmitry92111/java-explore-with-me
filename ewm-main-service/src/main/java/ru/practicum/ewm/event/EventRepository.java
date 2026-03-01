@@ -15,24 +15,22 @@ import java.util.Optional;
 @Repository
 public interface EventRepository extends JpaRepository<Event, Long> {
 
-    @Query(value = """
-                select e.id
-                from events e
-                where e.initiator_id = :initiatorId
-                order by e.id
-                limit :size offset :from
-            """, nativeQuery = true)
+    @Query(value =
+            "SELECT e.id " +
+            "FROM events e " +
+            "WHERE e.initiator_id = :initiatorId " +
+            "ORDER BY e.id " +
+            "LIMIT :size OFFSET :from",
+            nativeQuery = true)
     List<Long> findEventIdsByInitiatorId(@Param("initiatorId") long initiatorId,
                                          @Param("from") int from,
                                          @Param("size") int size);
 
-    @Query("""
-                select distinct e
-                from Event e
-                join fetch e.category
-                join fetch e.initiator
-                where e.id in :ids
-            """)
+    @Query("SELECT DISTINCT e " +
+            "FROM Event e " +
+            "JOIN FETCH e.category " +
+            "JOIN FETCH e.initiator " +
+            "WHERE e.id IN :ids")
     List<Event> findAllWithCategoryAndInitiatorByIdIn(@Param("ids") Collection<Long> ids);
 
     Optional<Event> findByIdAndInitiator_Id(long eventId, long initiatorId);
@@ -44,19 +42,16 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     boolean existsByCategory_Id(long categoryId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("""
-            select e
-            from Event e
-            where e.id = :eventId and e.initiator.id = :userId
-            """)
+    @Query("SELECT e " +
+            "FROM Event e " +
+            "WHERE e.id = :eventId AND e.initiator.id = :userId")
     Optional<Event> findByIdAndInitiatorIdForUpdate(@Param("eventId") long eventId,
                                                     @Param("userId") long userId);
 
-    @Query("""
-            select e from Event e
-            join fetch e.initiator
-            join fetch e.category
-            where e.id = :eventId
-            """)
+    @Query("SELECT e " +
+            "FROM Event e " +
+            "JOIN FETCH e.initiator " +
+            "JOIN FETCH e.category " +
+            "WHERE e.id = :eventId")
     Optional<Event> findByIdWithInitiatorAndCategory(@Param("eventId") long eventId);
 }

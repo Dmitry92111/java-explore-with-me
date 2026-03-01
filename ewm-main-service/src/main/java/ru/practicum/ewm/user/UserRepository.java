@@ -16,26 +16,26 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByIdAndDeletedIsFalse(long id);
 
-    @Query(value = """
-            SELECT *
-            FROM users
-            WHERE deleted IS FALSE
-            ORDER BY id
-            LIMIT :size
-            OFFSET :from
-            """, nativeQuery = true)
+    @Query(value =
+            "SELECT * " +
+            "FROM users " +
+            "WHERE deleted IS FALSE " +
+            "ORDER BY id " +
+            "LIMIT :size " +
+            "OFFSET :from",
+            nativeQuery = true)
     List<User> findAllOrderedById(@Param("from") int from,
                                   @Param("size") int size);
 
-    @Query(value = """
-            SELECT *
-            FROM users
-            WHERE deleted IS FALSE
-            AND id = ANY(:ids)
-            ORDER BY id
-            LIMIT :size
-            OFFSET :from
-            """, nativeQuery = true)
+    @Query(value =
+            "SELECT * " +
+            "FROM users " +
+            "WHERE deleted IS FALSE " +
+            "AND id IN (:ids) " +
+            "ORDER BY id " +
+            "LIMIT :size " +
+            "OFFSET :from",
+            nativeQuery = true)
     List<User> findAllOrderedByIdAndIdsIn(@Param("from") int from,
                                           @Param("size") int size,
                                           @Param("ids") List<Long> ids);
