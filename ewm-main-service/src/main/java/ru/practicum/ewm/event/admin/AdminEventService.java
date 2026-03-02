@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.category.Category;
 import ru.practicum.ewm.category.CategoryRepository;
+import ru.practicum.ewm.error.exception.BadRequestException;
 import ru.practicum.ewm.error.exception.ConditionsNotMetException;
 import ru.practicum.ewm.error.exception.NotFoundException;
 import ru.practicum.ewm.error.reasons_and_messages.ExceptionMessages;
@@ -53,7 +54,7 @@ public class AdminEventService {
         LocalDateTime end = EventUtils.parseDateOrNull(rangeEnd, "rangeEnd");
 
         if (start != null && end != null && start.isAfter(end)) {
-            throw new ConditionsNotMetException(ExceptionMessages.START_DATE_AFTER_END_DATE);
+            throw new BadRequestException(ExceptionMessages.START_DATE_AFTER_END_DATE);
         }
 
         List<EventStatus> parsedStates = EventUtils.parseStates(states);
@@ -86,6 +87,7 @@ public class AdminEventService {
 
         root.fetch("initiator", JoinType.LEFT);
         root.fetch("category", JoinType.LEFT);
+        query.select(root).distinct(true);
 
         query.where(cb.and(predicates.toArray(new Predicate[0])));
         query.orderBy(cb.desc(root.get("eventDate")));
@@ -116,8 +118,8 @@ public class AdminEventService {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException(ExceptionMessages.EVENT_NOT_FOUND));
 
-        if (dto.getCategoryId() != null) {
-            Category category = findCategoryOrThrow404(dto.getCategoryId());
+        if (dto.getCategory() != null) {
+            Category category = findCategoryOrThrow404(dto.getCategory());
             event.setCategory(category);
         }
 
@@ -154,6 +156,7 @@ public class AdminEventService {
                         throw new ConditionsNotMetException(ExceptionMessages.ONLY_PENDING_EVENT_CAN_BE_PUBLISHED);
                     }
                     event.setState(EventStatus.PUBLISHED);
+                    event.setPublishedOn(LocalDateTime.now());
                     break;
 
                 case REJECT_EVENT:
@@ -179,7 +182,7 @@ public class AdminEventService {
 
     private void validateEventDateForUpdateEvent(LocalDateTime eventDate) {
         if (eventDate.isBefore(LocalDateTime.now().plusHours(1))) {
-            throw new ConditionsNotMetException(String.format(ExceptionMessages.DEFAULT_FIELD_S_ERROR_S_VALUE_S_MESSAGE,
+            throw new BadRequestException(String.format(ExceptionMessages.DEFAULT_FIELD_S_ERROR_S_VALUE_S_MESSAGE,
                             "eventDate", "Too early to change this event", eventDate));
         }
     }

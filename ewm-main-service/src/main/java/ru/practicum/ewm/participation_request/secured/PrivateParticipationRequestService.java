@@ -18,6 +18,7 @@ import ru.practicum.ewm.user.User;
 import ru.practicum.ewm.user.UserRepository;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
@@ -34,8 +35,7 @@ public class PrivateParticipationRequestService {
         User requester = findUserOrThrow404(requesterId);
         Event event = findEventForUpdateOrThrow404(eventId);
 
-        Long initiatorId = event.getInitiator().getId();
-        if (initiatorId != null && initiatorId == requesterId) {
+        if (event.getInitiator() != null && event.getInitiator().getId() == requesterId) {
             throw new ConditionsNotMetException(String.format(
                     ExceptionMessages.INITIATOR_CANNOT_CREATE_REQUEST_TO_HIS_OWN_EVENT, eventId));
         }
@@ -55,19 +55,17 @@ public class PrivateParticipationRequestService {
             }
         }
 
-        ParticipationRequest newRequest = new ParticipationRequest();
-        newRequest.setRequester(requester);
-        newRequest.setEvent(event);
-        newRequest.setCreated(LocalDateTime.now());
-
         ParticipationRequestStatus status =
                 (event.getParticipantLimit() == 0 || !event.isRequestModeration())
                         ? ParticipationRequestStatus.CONFIRMED
                         : ParticipationRequestStatus.PENDING;
 
-        newRequest.setStatus(status);
-
-        ParticipationRequest saved = participationRequestRepository.save(newRequest);
+        ParticipationRequest saved = participationRequestRepository.save(new ParticipationRequest(
+                status,
+                LocalDateTime.now().truncatedTo(ChronoUnit.MICROS),
+                event,
+                requester)
+        );
         return participationRequestMapper.toParticipationRequestDto(saved);
     }
 

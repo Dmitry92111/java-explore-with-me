@@ -42,7 +42,7 @@ public class UpdateEventUserRequest {
     private LocationDto location;
 
     @Positive
-    private Long categoryId;
+    private Long category;
 
     private StateAction stateAction;
 }

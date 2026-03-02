@@ -5,9 +5,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.category.Category;
 import ru.practicum.ewm.category.CategoryRepository;
+import ru.practicum.ewm.error.exception.BadRequestException;
 import ru.practicum.ewm.error.exception.ConditionsNotMetException;
 import ru.practicum.ewm.error.exception.NotFoundException;
 import ru.practicum.ewm.error.reasons_and_messages.ExceptionMessages;
+import ru.practicum.ewm.event.assembler.EventShortDtoAssembler;
 import ru.practicum.ewm.event.dto.*;
 import ru.practicum.ewm.event.dto.event_request_status_update.EventRequestStatus;
 import ru.practicum.ewm.event.dto.event_request_status_update.EventRequestStatusUpdateRequest;
@@ -43,6 +45,7 @@ public class PrivateEventService {
     private final EventMapper eventMapper;
     private final LocationMapper locationMapper;
     private final ParticipationRequestMapper participationRequestMapper;
+    private final EventShortDtoAssembler eventShortDtoAssembler;
 
     @Transactional
     public EventFullDto create(long userId, NewEventDto createDto) {
@@ -50,7 +53,7 @@ public class PrivateEventService {
                 new NotFoundException(String.format(ExceptionMessages.USER_NOT_FOUND, userId))
         );
 
-        Category category = findCategoryOrThrow404(createDto.getCategoryId());
+        Category category = findCategoryOrThrow404(createDto.getCategory());
 
         validateEventDateForCreateAndUpdateEvent(createDto.getEventDate());
 
@@ -76,15 +79,7 @@ public class PrivateEventService {
             return List.of();
         }
 
-        Map<Long, Long> confirmedRequestsByEventId = eventMetricsService.getConfirmedRequestsForEvents(events);
-        Map<Long, Long> viewsById = eventMetricsService.getViewsStatsForEvents(events);
-
-        return events.stream()
-                .map(event -> eventMapper.toEventShortDto(
-                        event,
-                        confirmedRequestsByEventId.getOrDefault(event.getId(), 0L),
-                        viewsById.getOrDefault(event.getId(), 0L)
-                )).toList();
+        return eventShortDtoAssembler.toEventShortDtos(events);
     }
 
     @Transactional(readOnly = true)
@@ -107,8 +102,8 @@ public class PrivateEventService {
             throw new ConditionsNotMetException(ExceptionMessages.SHOULD_BE_IMPOSSIBLE_TO_UPDATE_PUBLISHED_EVENT);
         }
 
-        if (dto.getCategoryId() != null) {
-            Category category = findCategoryOrThrow404(dto.getCategoryId());
+        if (dto.getCategory() != null) {
+            Category category = findCategoryOrThrow404(dto.getCategory());
             event.setCategory(category);
         }
 
@@ -261,7 +256,7 @@ public class PrivateEventService {
 
     private void validateEventDateForCreateAndUpdateEvent(LocalDateTime eventDate) {
         if (eventDate.isBefore(LocalDateTime.now().plusHours(2))) {
-            throw new ConditionsNotMetException(String.format(
+            throw new BadRequestException(String.format(
                     ExceptionMessages.DEFAULT_FIELD_S_ERROR_S_VALUE_S_MESSAGE,
                     "eventDate", "должно содержать дату, которая еще не наступила.", eventDate));
         }

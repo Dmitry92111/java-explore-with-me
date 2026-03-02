@@ -12,6 +12,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 public class EventRequestStatusUpdateRequest {
-    private List<@Positive @UniqueElements Long> requestIds;
+    @UniqueElements
+    private List<@Positive Long> requestIds;
     private EventRequestStatus status;
 }

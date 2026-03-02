@@ -11,11 +11,13 @@ import java.time.format.*;
 import java.util.*;
 
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.ewm.error.exception.BadRequestException;
 import ru.practicum.ewm.error.exception.ConditionsNotMetException;
 import ru.practicum.ewm.error.exception.NotFoundException;
 import ru.practicum.ewm.error.reasons_and_messages.ExceptionMessages;
 import ru.practicum.ewm.event.EventMapper;
 import ru.practicum.ewm.event.EventRepository;
+import ru.practicum.ewm.event.assembler.EventShortDtoAssembler;
 import ru.practicum.ewm.event.dto.EventFullDto;
 import ru.practicum.ewm.event.dto.EventShortDto;
 import ru.practicum.ewm.event.entity.Event;
@@ -36,6 +38,7 @@ public class PublicEventService {
     private final EventMapper eventMapper;
     private final EventMetricsService eventMetricsService;
     private final EventRepository eventRepository;
+    private final EventShortDtoAssembler eventShortDtoAssembler;
 
     private final StatsClient statsClient;
 
@@ -61,7 +64,7 @@ public class PublicEventService {
         }
 
         if (start != null && end != null && start.isAfter(end)) {
-            throw new ConditionsNotMetException(ExceptionMessages.START_DATE_AFTER_END_DATE);
+            throw new BadRequestException(ExceptionMessages.START_DATE_AFTER_END_DATE);
         }
 
         PublicEventSort sortMode = parseSort(sort);
@@ -127,7 +130,7 @@ public class PublicEventService {
             query.setMaxResults(size);
 
             List<Event> events = query.getResultList();
-            return mapToShortDtosWithMetrics(events);
+            return eventShortDtoAssembler.toEventShortDtos(events);
 
         } else {
             cq.orderBy(cb.asc(root.get("eventDate")));
@@ -163,26 +166,15 @@ public class PublicEventService {
     public EventFullDto findEventById(long eventId) {
         Event event = eventRepository.findByIdWithInitiatorAndCategory(eventId).orElseThrow(
                 () -> new NotFoundException(String.format(ExceptionMessages.EVENT_NOT_FOUND, eventId)));
+
+        if (event.getState() != EventStatus.PUBLISHED) {
+            throw new NotFoundException(String.format(ExceptionMessages.EVENT_NOT_FOUND, eventId));
+        }
+
         long confirmedRequests = eventMetricsService.getConfirmedRequestsForEvent(event);
         long views = eventMetricsService.getViewsStatsForEvent(event);
         return eventMapper.toEventFullDto(event, confirmedRequests, views);
     }
-
-    private List<EventShortDto> mapToShortDtosWithMetrics(List<Event> events) {
-        if (events.isEmpty()) return List.of();
-
-        Map<Long, Long> confirmed = eventMetricsService.getConfirmedRequestsForEvents(events);
-        Map<Long, Long> views = eventMetricsService.getViewsStatsForEvents(events);
-
-        return events.stream()
-                .map(e -> eventMapper.toEventShortDto(
-                        e,
-                        confirmed.getOrDefault(e.getId(), 0L),
-                        views.getOrDefault(e.getId(), 0L)
-                ))
-                .toList();
-    }
-
 
     private PublicEventSort parseSort(String sort) {
         if (sort == null || sort.isBlank()) return PublicEventSort.EVENT_DATE; // дефолт обычно по дате

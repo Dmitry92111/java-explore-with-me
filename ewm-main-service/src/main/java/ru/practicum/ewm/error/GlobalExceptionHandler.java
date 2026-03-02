@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import ru.practicum.ewm.error.exception.BadRequestException;
 import ru.practicum.ewm.error.exception.ConditionsNotMetException;
 import ru.practicum.ewm.error.exception.ForbiddenException;
 import ru.practicum.ewm.error.exception.NotFoundException;
@@ -150,6 +151,18 @@ public class GlobalExceptionHandler {
                 HttpStatus.CONFLICT.name(),
                 ExceptionReasons.DATA_CONFLICT,
                 message
+        );
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiError handleBadRequest(BadRequestException ex,
+                                     HttpServletRequest req) {
+        log4xx(HttpStatus.BAD_REQUEST, req, ex.getMessage());
+        return new ApiError(
+                HttpStatus.BAD_REQUEST.name(),
+                ExceptionReasons.INCORRECT_REQUEST,
+                ex.getMessage()
         );
     }
 

@@ -15,19 +15,20 @@ public class AdminCompilationController {
     private final AdminCompilationService adminCompilationService;
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public CompilationDto create(@Valid @RequestBody NewCompilationDto dto) {
         return adminCompilationService.create(dto);
     }
 
-    @DeleteMapping("{compId}")
+    @DeleteMapping("/{compId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable long compId) {
         adminCompilationService.delete(compId);
     }
 
-    @PatchMapping("{compId}")
+    @PatchMapping("/{compId}")
     public CompilationDto update(@PathVariable long compId,
-                                 @RequestBody UpdateCompilationRequest dto) {
+                                 @Valid @RequestBody UpdateCompilationRequest dto) {
         return adminCompilationService.update(compId, dto);
     }
 }

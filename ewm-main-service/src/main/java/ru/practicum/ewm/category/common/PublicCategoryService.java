@@ -22,6 +22,9 @@ public class PublicCategoryService {
     @Transactional(readOnly = true)
     public List<CategoryDto> getCategories(int from, int size) {
         List<Category> categories = categoryRepository.findAllOrderedById(from, size);
+        if (categories.isEmpty()) {
+            return List.of();
+        }
         return categoryMapper.toCategoryDto(categories);
     }
 

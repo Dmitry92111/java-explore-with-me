@@ -1,5 +1,7 @@
 package ru.practicum.stats.client;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.ResourceAccessException;
@@ -15,7 +17,7 @@ import java.util.List;
 
 
 public class StatsClientImpl implements StatsClient {
-
+    private static final Logger log = LoggerFactory.getLogger(StatsClientImpl.class);
     private final RestTemplate restTemplate;
     private final String baseUrl;
 
@@ -46,6 +48,7 @@ public class StatsClientImpl implements StatsClient {
         String url = buildUrlForStatsRequest(start, end, uris, unique);
 
         try {
+            log.info("Stats GET URL = {}", url);
             ResponseEntity<ViewStatsDto[]> response = restTemplate.getForEntity(url, ViewStatsDto[].class);
             ViewStatsDto[] body = response.getBody();
             return body == null ? List.of() : List.of(body);
@@ -61,8 +64,11 @@ public class StatsClientImpl implements StatsClient {
                                            LocalDateTime end,
                                            List<String> uris,
                                            boolean unique) {
+        log.info("Formatted start = {}", format(start));
+        log.info("Stats baseUrl = '{}'", baseUrl);
         UriComponentsBuilder builder = UriComponentsBuilder
-                .fromHttpUrl(baseUrl + "/stats")
+                .fromHttpUrl(baseUrl)
+                .path("/stats")
                 .queryParam("start", format(start))
                 .queryParam("end", format(end));
 
@@ -74,7 +80,7 @@ public class StatsClientImpl implements StatsClient {
             uris.forEach(uri -> builder.queryParam("uris", uri));
         }
 
-        return builder.build().encode().toUriString();
+        return builder.build().toUriString();
     }
 
     private String format(LocalDateTime time) {

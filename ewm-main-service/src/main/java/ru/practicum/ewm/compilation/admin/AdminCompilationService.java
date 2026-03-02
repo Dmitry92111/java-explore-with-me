@@ -11,24 +11,24 @@ import ru.practicum.ewm.compilation.dto.NewCompilationDto;
 import ru.practicum.ewm.compilation.dto.UpdateCompilationRequest;
 import ru.practicum.ewm.error.exception.NotFoundException;
 import ru.practicum.ewm.error.reasons_and_messages.ExceptionMessages;
-import ru.practicum.ewm.event.EventMapper;
+
 import ru.practicum.ewm.event.EventRepository;
+import ru.practicum.ewm.event.assembler.EventShortDtoAssembler;
 import ru.practicum.ewm.event.dto.EventShortDto;
 import ru.practicum.ewm.event.entity.Event;
-import ru.practicum.ewm.event.metrics.EventMetricsService;
+
 
 import java.util.*;
-import java.util.stream.Collectors;
+
 
 @Service
 @RequiredArgsConstructor
 public class AdminCompilationService {
     private final CompilationRepository compilationRepository;
     private final EventRepository eventRepository;
-    private final EventMetricsService eventMetricsService;
 
     private final CompilationMapper compilationMapper;
-    private final EventMapper eventMapper;
+    private final EventShortDtoAssembler eventShortDtoAssembler;
 
     @Transactional
     public CompilationDto create(NewCompilationDto dto) {
@@ -38,7 +38,8 @@ public class AdminCompilationService {
         compilation.setEvents(new HashSet<>(events));
 
         Compilation saved = compilationRepository.save(compilation);
-        return compilationMapper.toDto(saved, toEventShortDtos(events));
+        List<EventShortDto> eventShortDtos = eventShortDtoAssembler.toEventShortDtos(events);
+        return compilationMapper.toDto(saved, new HashSet<>(eventShortDtos));
     }
 
     @Transactional
@@ -68,22 +69,8 @@ public class AdminCompilationService {
             eventsForDto = new ArrayList<>(compilation.getEvents());
         }
 
-        return compilationMapper.toDto(compilation, toEventShortDtos(eventsForDto));
-    }
-
-    private Set<EventShortDto> toEventShortDtos(List<Event> events) {
-        if (events.isEmpty()) return Collections.emptySet();
-
-        Map<Long, Long> confirmed = eventMetricsService.getConfirmedRequestsForEvents(events);
-        Map<Long, Long> views = eventMetricsService.getViewsStatsForEvents(events);
-
-        return events.stream()
-                .map(e -> eventMapper.toEventShortDto(
-                        e,
-                        confirmed.getOrDefault(e.getId(), 0L),
-                        views.getOrDefault(e.getId(), 0L)
-                ))
-                .collect(Collectors.toSet());
+        List<EventShortDto> eventShortDtos = eventShortDtoAssembler.toEventShortDtos(eventsForDto);
+        return compilationMapper.toDto(compilation, new HashSet<>(eventShortDtos));
     }
 
     private List<Event> loadEventsOrThrow(Set<Long> ids) {

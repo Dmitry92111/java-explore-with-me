@@ -48,5 +48,5 @@ public class NewEventDto {
 
     @NotNull
     @Positive
-    private Long categoryId;
+    private Long category;
 }

@@ -1,5 +1,8 @@
 package ru.practicum.ewm.compilation;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -11,7 +14,6 @@ import java.util.Optional;
 @Repository
 public interface CompilationRepository extends JpaRepository<Compilation, Long> {
 
-
     @Query("SELECT DISTINCT c " +
             "FROM Compilation c " +
             "LEFT JOIN FETCH c.events " +
@@ -21,4 +23,27 @@ public interface CompilationRepository extends JpaRepository<Compilation, Long> 
     @Modifying
     @Query("DELETE FROM Compilation c where c.id = :id")
     int deleteByIdReturningCount(@Param("id") long id);
+
+    @EntityGraph(attributePaths = {
+            "events",
+            "events.category",
+            "events.initiator"
+    })
+    Page<Compilation> findAllByPinned(boolean pinned, Pageable pageable);
+
+
+    @EntityGraph(attributePaths = {
+            "events",
+            "events.category",
+            "events.initiator"
+    })
+    Page<Compilation> findAllBy(Pageable pageable);
+
+    @EntityGraph(attributePaths = {
+            "events",
+            "events.category",
+            "events.initiator"
+    })
+    @Query("SELECT c FROM Compilation c WHERE c.id = :id")
+    Optional<Compilation> findWithGraphById(@Param("id") long id);
 }

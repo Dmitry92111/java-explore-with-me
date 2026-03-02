@@ -59,7 +59,7 @@ public class EventMetricsService {
 
         List<String> uris = new ArrayList<>(uriToId.keySet());
 
-        List<ViewStatsDto> viewStatsDtos = statsClient.getStats(minPublishedDate, now, uris, false);
+        List<ViewStatsDto> viewStatsDtos = statsClient.getStats(minPublishedDate, now, uris, true);
 
         viewStatsDtos.forEach(viewStatsDto -> {
             Long eventId = uriToId.get(viewStatsDto.getUri());

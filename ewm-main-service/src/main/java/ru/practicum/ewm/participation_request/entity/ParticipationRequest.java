@@ -1,10 +1,7 @@
 package ru.practicum.ewm.participation_request.entity;
 
 import jakarta.persistence.*;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import ru.practicum.ewm.event.entity.Event;
 import ru.practicum.ewm.user.User;
 
@@ -43,4 +40,14 @@ public class ParticipationRequest {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "requester_id", nullable = false)
     private User requester;
+
+    public ParticipationRequest(ParticipationRequestStatus status,
+                                LocalDateTime created,
+                                Event event,
+                                User requester) {
+        this.status = status;
+        this.created = created;
+        this.event = event;
+        this.requester = requester;
+    }
 }
