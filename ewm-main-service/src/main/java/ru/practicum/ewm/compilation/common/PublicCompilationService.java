@@ -37,7 +37,7 @@ public class PublicCompilationService {
         Pageable pageable = PageRequest.of(from / size, size, Sort.by("id"));
 
         Page<Compilation> compilations;
-        if(pinned == null) {
+        if (pinned == null) {
             compilations = compilationRepository.findAllBy(pageable);
         } else {
             compilations = compilationRepository.findAllByPinned(pinned, pageable);
