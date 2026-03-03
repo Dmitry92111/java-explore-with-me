@@ -38,7 +38,7 @@ public class Category {
                 ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass()
                 : this.getClass();
 
-        if(thisEffectiveClass != oEffectiveClass) return false;
+        if (thisEffectiveClass != oEffectiveClass) return false;
         Category category = (Category) o;
         return getId() != null && Objects.equals(getId(), category.getId());
     }

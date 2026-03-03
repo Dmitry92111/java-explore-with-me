@@ -50,7 +50,7 @@ public class EndpointHit {
                 ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass()
                 : this.getClass();
 
-        if(thisEffectiveClass != oEffectiveClass) return false;
+        if (thisEffectiveClass != oEffectiveClass) return false;
         EndpointHit endpointHit = (EndpointHit) o;
         return getId() != null && Objects.equals(getId(), endpointHit.getId());
     }

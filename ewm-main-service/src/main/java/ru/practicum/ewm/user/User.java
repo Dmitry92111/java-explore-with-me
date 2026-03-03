@@ -70,7 +70,7 @@ public class User {
                 ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass()
                 : this.getClass();
 
-        if(thisEffectiveClass != oEffectiveClass) return false;
+        if (thisEffectiveClass != oEffectiveClass) return false;
         User user = (User) o;
         return getId() != null && Objects.equals(getId(), user.getId());
     }

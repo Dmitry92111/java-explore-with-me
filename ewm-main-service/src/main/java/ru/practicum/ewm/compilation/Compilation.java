@@ -53,7 +53,7 @@ public class Compilation {
                 ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass()
                 : this.getClass();
 
-        if(thisEffectiveClass != oEffectiveClass) return false;
+        if (thisEffectiveClass != oEffectiveClass) return false;
         Compilation compilation = (Compilation) o;
         return getId() != null && Objects.equals(getId(), compilation.getId());
     }
