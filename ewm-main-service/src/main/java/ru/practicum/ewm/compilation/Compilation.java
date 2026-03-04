@@ -1,41 +1,44 @@
-package ru.practicum.stats.server.entity;
+package ru.practicum.ewm.compilation;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.proxy.HibernateProxy;
+import ru.practicum.ewm.event.entity.Event;
 
-import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
-@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
 @Entity
-@Table(name = "endpoint_hits")
+@Table(name = "compilations")
 @ToString
-public class EndpointHit {
+public class Compilation {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "app", nullable = false, length = 64)
-    private String app;
+    @Column(name = "pinned", nullable = false)
+    private boolean pinned;
 
-    @Column(name = "uri", nullable = false, length = 128)
-    private String uri;
+    @Column(name = "title", nullable = false, length = 50)
+    private String title;
 
-    @Column(name = "ip", nullable = false, length = 45)
-    private String ip;
-
-    @Column(name = "created", nullable = false)
-    private LocalDateTime created;
-
-    public static EndpointHit of(String app, String uri, String ip, LocalDateTime created) {
-        return new EndpointHit(null, app, uri, ip, created);
-    }
+    @ToString.Exclude
+    @ManyToMany
+    @JoinTable(
+            name = "events_compilations",
+            joinColumns = @JoinColumn(name = "compilation_id"),
+            inverseJoinColumns = @JoinColumn(name = "event_id")
+    )
+    private Set<Event> events = new HashSet<>();
 
     @Override
     public final boolean equals(Object o) {
@@ -51,8 +54,8 @@ public class EndpointHit {
                 : this.getClass();
 
         if (thisEffectiveClass != oEffectiveClass) return false;
-        EndpointHit endpointHit = (EndpointHit) o;
-        return getId() != null && Objects.equals(getId(), endpointHit.getId());
+        Compilation compilation = (Compilation) o;
+        return getId() != null && Objects.equals(getId(), compilation.getId());
     }
 
     @Override

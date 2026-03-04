@@ -1,41 +1,29 @@
-package ru.practicum.stats.server.entity;
+package ru.practicum.ewm.category;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.proxy.HibernateProxy;
 
-import java.time.LocalDateTime;
 import java.util.Objects;
 
-@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
 @Entity
-@Table(name = "endpoint_hits")
+@Table(name = "categories")
 @ToString
-public class EndpointHit {
+public class Category {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "app", nullable = false, length = 64)
-    private String app;
-
-    @Column(name = "uri", nullable = false, length = 128)
-    private String uri;
-
-    @Column(name = "ip", nullable = false, length = 45)
-    private String ip;
-
-    @Column(name = "created", nullable = false)
-    private LocalDateTime created;
-
-    public static EndpointHit of(String app, String uri, String ip, LocalDateTime created) {
-        return new EndpointHit(null, app, uri, ip, created);
-    }
+    @Column(name = "name", length = 50, nullable = false, unique = true)
+    private String name;
 
     @Override
     public final boolean equals(Object o) {
@@ -51,8 +39,8 @@ public class EndpointHit {
                 : this.getClass();
 
         if (thisEffectiveClass != oEffectiveClass) return false;
-        EndpointHit endpointHit = (EndpointHit) o;
-        return getId() != null && Objects.equals(getId(), endpointHit.getId());
+        Category category = (Category) o;
+        return getId() != null && Objects.equals(getId(), category.getId());
     }
 
     @Override
