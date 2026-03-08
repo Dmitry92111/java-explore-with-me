@@ -44,4 +44,6 @@ public interface ParticipationRequestRepository extends JpaRepository<Participat
     int updateParticipationRequestsStatusByRequesterId(@Param("userId") long userId,
                                                        @Param("oldStatus") ParticipationRequestStatus oldStatus,
                                                        @Param("newStatus") ParticipationRequestStatus newStatus);
+
+    boolean existsByEvent_IdAndRequester_IdAndStatus(long eventId, long requesterId, ParticipationRequestStatus status);
 }

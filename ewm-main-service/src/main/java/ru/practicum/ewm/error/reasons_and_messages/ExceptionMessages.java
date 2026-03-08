@@ -73,4 +73,11 @@ public class ExceptionMessages {
     public static final String COMPILATION_NOT_FOUND = "Compilation with id=%d was not found";
     public static final String SOME_EVENTS_IN_NEW_COMPILATION_DO_NOT_EXIST =
             "Your compilation contains ids which are not exist";
+
+    //Comment
+    public static final String USER_IS_NOT_ALLOWED_TO_COMMENT_EVENT_FOR_PARTICIPANTS_ONLY =
+            "Only confirmed participants can comment on this event";
+    public static final String COMMENT_NOT_FOUND = "Comment with id=%d was not found";
+    public static final String SHOULD_BE_IMPOSSIBLE_TO_UPDATE_COMMENTS_OF_DELETED_USER =
+            "It is not allowed to update comments of deleted user";
 }
